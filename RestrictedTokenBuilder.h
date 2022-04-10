@@ -6,10 +6,12 @@ class RestrictedTokenBuilder
     static constexpr WELL_KNOWN_SID_TYPE SID_Whitelist[] = {
         WinWorldSid,
         WinBuiltinUsersSid,
+        WinAuthenticatedUserSid,
     };
 
     static constexpr const wchar_t* Privilege_Whitelist[] = {
         SE_CHANGE_NOTIFY_NAME,
+        SE_IMPERSONATE_NAME,
     };
 
 public:
@@ -17,7 +19,6 @@ public:
     ~RestrictedTokenBuilder();
 
     HANDLE get_token();
-
 
 private:
     void get_deny_only_sids(HANDLE);

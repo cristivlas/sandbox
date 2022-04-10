@@ -12,7 +12,7 @@ void execute(const std::wstring& CmdLine)
 
         STARTUPINFOW si = {};
         PROCESS_INFORMATION pi = {};
-        DWORD Flags = CREATE_NEW_PROCESS_GROUP;
+        DWORD Flags = 0;
 
         CALL_API(::CreateProcessAsUserW(
             tokenBuilder.get_token(),
@@ -29,7 +29,7 @@ void execute(const std::wstring& CmdLine)
         ));
 
          // Wait until child process exits.
-        ::WaitForSingleObject(pi.hProcess, INFINITE);
+        CALL_API(::WaitForSingleObject(pi.hProcess, INFINITE));
 
         ::CloseHandle(pi.hThread);
         ::CloseHandle(pi.hProcess);

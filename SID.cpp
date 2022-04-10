@@ -35,6 +35,6 @@ void Sid::get_name()
     char* name = nullptr;
     CALL_API(::ConvertSidToStringSidA(&m_data[0], &name));
     OnScopeExit<> cleanup([name]() { ::LocalFree(name); });
-    
+
     m_name.assign(name);    
 }

@@ -69,6 +69,7 @@ public:
         : m_f(f)
     {
     }
+
     ~OnScopeExit() noexcept(false)
     {
         if (m_f)

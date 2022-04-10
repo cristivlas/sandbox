@@ -25,20 +25,21 @@ HANDLE RestrictedTokenBuilder::get_token()
         get_deny_only_sids(hBaseToken);
         get_privileges_to_remove(hBaseToken);
 
-        DWORD flags = 0;
+        DWORD flags = SANDBOX_INERT;
 
         std::vector<SID_AND_ATTRIBUTES> denyOnly;
         for (const auto& sid : m_denyOnly)
         {
-            denyOnly.emplace_back(SID_AND_ATTRIBUTES({ sid, SE_GROUP_USE_FOR_DENY_ONLY }));
+            denyOnly.emplace_back(SID_AND_ATTRIBUTES{ sid, SE_GROUP_USE_FOR_DENY_ONLY });
         }
-        
+
         CALL_API(::CreateRestrictedToken(hBaseToken, flags, 
             static_cast<DWORD>(denyOnly.size()),
             denyOnly.size() ? &denyOnly[0] : nullptr, 
             static_cast<DWORD>(m_privileges.size()),
             m_privileges.size() ? &m_privileges[0] : nullptr,
-            0, nullptr,
+            0,
+            nullptr,
             &m_hToken));
 
         set_integrity_level();
@@ -149,8 +150,6 @@ S-1-16-28672    Secure Process
 
 void RestrictedTokenBuilder::set_integrity_level()
 {
-    // Sid sid("S-1-16-0");
-    // Sid sid("S-1-16-4096");
     Sid sid("S-1-16-8192");
 
     TOKEN_MANDATORY_LABEL tml { sid, SE_GROUP_INTEGRITY };
