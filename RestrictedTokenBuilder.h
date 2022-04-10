@@ -3,9 +3,13 @@
 
 class RestrictedTokenBuilder
 {
-    static constexpr WELL_KNOWN_SID_TYPE Whitelist[] = {
+    static constexpr WELL_KNOWN_SID_TYPE SID_Whitelist[] = {
         WinWorldSid,
         WinBuiltinUsersSid,
+    };
+
+    static constexpr const wchar_t* Privilege_Whitelist[] = {
+        SE_CHANGE_NOTIFY_NAME,
     };
 
 public:
@@ -13,11 +17,14 @@ public:
     ~RestrictedTokenBuilder();
 
     HANDLE get_token();
-    bool is_whitelisted(const Sid&) const;
+
 
 private:
     void get_deny_only_sids(HANDLE);
     void get_privileges_to_remove(HANDLE);
+
+    bool is_whitelisted_sid(const Sid&) const;
+    bool is_whitelisted_privilege(const LUID&) const;
 
     void set_integrity_level();
 

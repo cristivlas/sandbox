@@ -12,7 +12,7 @@ void execute(const std::wstring& CmdLine)
 
         STARTUPINFOW si = {};
         PROCESS_INFORMATION pi = {};
-        DWORD Flags = 0;
+        DWORD Flags = CREATE_NEW_PROCESS_GROUP;
 
         CALL_API(::CreateProcessAsUserW(
             tokenBuilder.get_token(),

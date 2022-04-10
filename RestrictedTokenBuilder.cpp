@@ -69,7 +69,7 @@ void RestrictedTokenBuilder::get_deny_only_sids(HANDLE hToken)
             && (Group.Attributes & SE_GROUP_INTEGRITY) == 0)
         {
             Sid sid(Group.Sid);
-            if (is_whitelisted(sid))
+            if (is_whitelisted_sid(sid))
                 continue;
 
             m_denyOnly.emplace_back(sid);
@@ -93,27 +93,35 @@ void RestrictedTokenBuilder::get_privileges_to_remove(HANDLE hToken)
 
     for (DWORD i = 0; i < pPriv->PrivilegeCount; ++i)
     {
-        LUID luid = {};
-        CALL_API(::LookupPrivilegeValueW(nullptr, SE_CHANGE_NOTIFY_NAME, &luid));
-        
-        if (   luid.LowPart == pPriv->Privileges[i].Luid.LowPart
-            && luid.HighPart == pPriv->Privileges[i].Luid.HighPart)
-        {
+        if (is_whitelisted_privilege(pPriv->Privileges[i].Luid))
             continue;
-        }
+
         m_privileges.emplace_back(pPriv->Privileges[i]);
     }
 }
 
-bool RestrictedTokenBuilder::is_whitelisted(const Sid& sid) const
+bool RestrictedTokenBuilder::is_whitelisted_sid(const Sid& sid) const
 {
-    for (const auto known_type : Whitelist)
+    for (const auto known_type : SID_Whitelist)
     {
         if (::IsWellKnownSid(sid, known_type))
         {
             // std::cout << sid.name() << "\n";
             return true;
         }
+    }
+    return false;
+}
+
+bool RestrictedTokenBuilder::is_whitelisted_privilege(const LUID& priv_luid) const
+{
+    for (const auto& ok_luid : Privilege_Whitelist)
+    {
+        LUID luid = {};
+        CALL_API(::LookupPrivilegeValueW(nullptr, SE_CHANGE_NOTIFY_NAME, &luid));
+
+        if (luid.LowPart == priv_luid.LowPart && luid.HighPart == priv_luid.HighPart)
+            return true;
     }
     return false;
 }
@@ -142,7 +150,8 @@ S-1-16-28672    Secure Process
 void RestrictedTokenBuilder::set_integrity_level()
 {
     // Sid sid("S-1-16-0");
-    Sid sid("S-1-16-4096");
+    // Sid sid("S-1-16-4096");
+    Sid sid("S-1-16-8192");
 
     TOKEN_MANDATORY_LABEL tml { sid, SE_GROUP_INTEGRITY };
 
