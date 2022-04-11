@@ -21,6 +21,9 @@ public:
     HANDLE get_token();
 
 private:
+    RestrictedTokenBuilder(const RestrictedTokenBuilder&) = delete;
+    RestrictedTokenBuilder& operator=(const RestrictedTokenBuilder&) = delete;
+
     void get_deny_only_sids(HANDLE);
     void get_privileges_to_remove(HANDLE);
 
